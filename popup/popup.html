@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoPrompting</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="title">AutoPrompting</h1>
+          <p class="subtitle">Auto submit &amp; New Chat on Meta.ai</p>
+        </div>
+      </div>
+      <div id="statusBadge" class="status-badge idle">IDLE</div>
+    </header>
+
+    <!-- Queue & Input Section -->
+    <section class="card input-section">
+      <div class="card-header">
+        <label for="promptInput" class="section-label">
+          <span>Daftar Antrian Prompt</span>
+          <span id="promptCountBadge" class="counter-badge">0 prompt</span>
+        </label>
+        <div class="header-actions">
+          <button id="btnLoadSample" class="text-btn" title="Muat contoh prompt">Contoh</button>
+          <button id="btnClearInput" class="text-btn text-danger" title="Hapus teks">Bersihkan</button>
+        </div>
+      </div>
+
+      <textarea 
+        id="promptInput" 
+        class="prompt-textarea" 
+        placeholder="Masukkan prompt Anda di sini.&#10;Secara default, 1 baris = 1 prompt.&#10;&#10;Contoh:&#10;Jelaskan teori relativitas secara singkat&#10;Buatkan resep nasi goreng spesial&#10;Tuliskan 5 ide bisnis modal kecil"
+        rows="7"
+        spellcheck="false"
+      ></textarea>
+
+      <div class="delimiter-toggle">
+        <label class="checkbox-label" title="Gunakan '---' untuk memisahkan prompt jika prompt Anda memiliki beberapa baris / paragraf">
+          <input type="checkbox" id="delimiterToggle">
+          <span class="custom-checkbox"></span>
+          <span class="checkbox-text">Gunakan pemisah <code>---</code> (untuk prompt multi-paragraf)</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Progress Card (Hidden or active) -->
+    <section id="progressSection" class="card progress-section">
+      <div class="progress-info">
+        <div class="progress-title-group">
+          <span id="progressStepText" class="progress-step">Menunggu...</span>
+          <span id="progressPercent" class="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+      <div class="current-task-box">
+        <div class="task-label">Prompt Saat Ini:</div>
+        <div id="currentPromptPreview" class="task-preview">- Belum ada antrian berjalan -</div>
+        <div class="task-status-row">
+          <div class="spinner-small" id="statusSpinner"></div>
+          <span id="statusDetailText" class="task-detail">Siap memulai</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings (Collapsible) -->
+    <details class="card settings-card" id="settingsDetails">
+      <summary class="settings-summary">
+        <span>⚙️ Pengaturan Waktu &amp; Alur</span>
+        <span class="chevron">▼</span>
+      </summary>
+      <div class="settings-body">
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">Jeda Setelah Jawaban Selesai</span>
+            <span class="setting-desc">Waktu tunggu sebelum klik New Chat</span>
+          </div>
+          <div class="setting-input-group">
+            <input type="number" id="delayAfterResponse" min="1" max="60" value="5">
+            <span class="unit">detik</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">Batas Proses Berjalan (Concurrent)</span>
+            <span class="setting-desc">Tunggu jika ada ≥ 5 proses masih loading</span>
+          </div>
+          <div class="setting-input-group">
+            <input type="number" id="maxConcurrent" min="1" max="10" value="5">
+            <span class="unit">proses</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">Batas Maksimum Respons (Timeout)</span>
+            <span class="setting-desc">Keamanan jika Meta.ai berhenti mendadak</span>
+          </div>
+          <div class="setting-input-group">
+            <input type="number" id="maxTimeout" min="15" max="300" value="90">
+            <span class="unit">detik</span>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">Otomatis Buka "New Chat"</span>
+            <span class="setting-desc">Reset obrolan sebelum prompt berikutnya</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="alwaysNewChat" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <span class="setting-title">Otomatis Unduh Gambar</span>
+            <span class="setting-desc">Klik tombol Unduh saat gambar AI selesai</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoDownloadImages" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <!-- Action Buttons -->
+    <div class="action-footer">
+      <div class="controls-grid" id="controlsContainer">
+        <button id="btnStart" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span id="btnStartText">Mulai Antrian</span>
+        </button>
+
+        <button id="btnPause" class="btn btn-warning" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+          <span>Jeda</span>
+        </button>
+
+        <button id="btnStop" class="btn btn-danger" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <rect x="5" y="5" width="14" height="14"></rect>
+          </svg>
+          <span>Hentikan</span>
+        </button>
+      </div>
+
+      <div class="tab-helper">
+        <button id="btnOpenMeta" class="link-btn">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          Buka Tab Meta.ai
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

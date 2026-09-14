@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080c14" />
+      <stop offset="45%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <!-- Border Glow Gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#818cf8" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Prompt Chevron Gradient -->
+    <linearGradient id="chevGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+
+    <!-- Sparkle / Magic Gradient -->
+    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="50%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base Squircle with Glowing Border -->
+  <rect x="24" y="24" width="464" height="464" rx="116" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="14" />
+
+  <!-- Chevron Prompt Symbol ">" -->
+  <path d="M 152 168 L 248 256 L 152 344" 
+        fill="none" 
+        stroke="url(#chevGrad)" 
+        stroke-width="46" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" />
+
+  <!-- AI Automation Sparkle Symbol "✦" -->
+  <path d="M 346 160 
+           C 346 212 370 236 422 236 
+           C 428 236 434 246 434 256 
+           C 434 266 428 276 422 276 
+           C 370 276 346 300 346 352 
+           C 346 358 336 364 326 364 
+           C 316 364 306 358 306 352 
+           C 306 300 282 276 230 276 
+           C 224 276 218 266 218 256 
+           C 218 246 224 236 230 236 
+           C 282 236 306 212 306 160 
+           C 306 154 316 148 326 148 
+           C 336 148 346 154 346 160 Z" 
+        fill="url(#sparkGrad)" />
+
+  <!-- Accent Orbs -->
+  <circle cx="396" cy="148" r="12" fill="#38bdf8" />
+  <circle cx="160" cy="380" r="9" fill="#c084fc" opacity="0.85" />
+</svg>

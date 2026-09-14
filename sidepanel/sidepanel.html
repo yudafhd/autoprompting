@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0; url=../dashboard/dashboard.html">
+  <title>Meta.ai AutoPrompt - Dashboard</title>
+  <script>window.location.replace('../dashboard/dashboard.html');</script>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div class="sidepanel-container">
+    <!-- Sticky Header -->
+    <header class="header">
+      <div class="header-top">
+        <div class="logo-group">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="title">Meta AutoPrompt</h1>
+            <p class="subtitle">Side Panel Pro • Meta.ai Automation</p>
+          </div>
+        </div>
+        <div id="statusBadge" class="status-badge idle">IDLE</div>
+      </div>
+
+      <!-- Live Meta.ai Connection Indicator -->
+      <div id="tabIndicator" class="tab-indicator disconnected">
+        <span class="pulse-dot"></span>
+        <span id="tabIndicatorText">Memeriksa tab Meta.ai...</span>
+        <button id="btnQuickFocus" class="quick-focus-btn" title="Fokus atau buka tab Meta.ai">Fokus</button>
+      </div>
+
+      <!-- Tab Navigation Bar -->
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="queue">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
+          </svg>
+          <span>Antrian</span>
+          <span id="tabCountBadge" class="nav-count">0</span>
+        </button>
+
+        <button class="nav-tab" data-tab="matrix">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span>Matrix</span>
+        </button>
+
+        <button class="nav-tab" data-tab="history">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Riwayat</span>
+          <span id="historyCountBadge" class="nav-count">0</span>
+        </button>
+
+        <button class="nav-tab" data-tab="settings">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Pengaturan</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Scrollable Tab Content Container -->
+    <main class="main-content">
+      <!-- Live Progress Bar (Always visible on top of views when active) -->
+      <section id="progressSection" class="card progress-section">
+        <div class="progress-info">
+          <div class="progress-title-group">
+            <span id="progressStepText" class="progress-step">Menunggu antrian...</span>
+            <span id="progressPercent" class="progress-percent">0%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="progressBarFill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+        <div class="current-task-box">
+          <div class="task-header-row">
+            <span class="task-label">Prompt Sedang Berjalan:</span>
+            <span id="taskQueuePosition" class="task-badge">- / -</span>
+          </div>
+          <div id="currentPromptPreview" class="task-preview">- Belum ada antrian berjalan -</div>
+          <div class="task-status-row">
+            <div class="spinner-small" id="statusSpinner"></div>
+            <span id="statusDetailText" class="task-detail">Siap memulai antrian</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           TAB 1: ANTRIAN (QUEUE MANAGER)
+           ========================================== -->
+      <div id="tabContentQueue" class="tab-pane active">
+        <section class="card input-section">
+          <div class="card-header">
+            <div class="view-switch-group">
+              <button id="btnViewText" class="view-toggle-btn active" title="Tampilan Teks">Teks</button>
+              <button id="btnViewVisual" class="view-toggle-btn" title="Tampilan Kartu Interaktif">Daftar Visual</button>
+            </div>
+            <div class="header-actions">
+              <button id="btnLoadSample" class="text-btn" title="Muat contoh prompt">Contoh</button>
+              <button id="btnImportQueue" class="text-btn" title="Impor dari file .txt atau .json">Impor</button>
+              <button id="btnExportQueue" class="text-btn" title="Ekspor antrian saat ini">Ekspor</button>
+              <button id="btnClearInput" class="text-btn text-danger" title="Bersihkan kotak teks">Bersihkan</button>
+              <input type="file" id="fileImporter" accept=".txt,.json" style="display: none;">
+            </div>
+          </div>
+
+          <!-- Mode 1: Textarea Raw Input -->
+          <div id="viewModeText" class="view-mode-container active">
+            <div class="textarea-wrapper">
+              <textarea 
+                id="promptInput" 
+                class="prompt-textarea" 
+                placeholder="Ketik atau tempel daftar prompt Anda di sini.&#10;Secara default, 1 baris = 1 prompt.&#10;&#10;Contoh:&#10;buatkan gambar kucing 3d oren gemoy dengan syal hijau&#10;buatkan gambar kafe estetik bernuansa senja di Kyoto&#10;jelaskan secara sederhana apa itu artificial intelligence"
+                spellcheck="false"
+              ></textarea>
+            </div>
+
+            <div class="delimiter-toggle">
+              <label class="checkbox-label" title="Gunakan '---' untuk memisahkan prompt jika memiliki beberapa baris/paragraf">
+                <input type="checkbox" id="delimiterToggle">
+                <span class="custom-checkbox"></span>
+                <span class="checkbox-text">Gunakan pemisah <code>---</code> (untuk prompt multi-paragraf)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Mode 2: Interactive Visual Queue List -->
+          <div id="viewModeVisual" class="view-mode-container">
+            <div id="visualQueueList" class="visual-queue-list">
+              <!-- Item kartu antrian di-generate secara dinamis via JS -->
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================
+           TAB 2: TEMPLATE MATRIX GENERATOR
+           ========================================== -->
+      <div id="tabContentMatrix" class="tab-pane">
+        <section class="card matrix-section">
+          <div class="matrix-header">
+            <h2 class="section-title">✨ Generator Kombinasi Prompt</h2>
+            <p class="section-subtitle">Buat puluhan variasi prompt otomatis menggunakan tanda kurung siku <code>[a, b, c]</code>.</p>
+          </div>
+
+          <div class="matrix-form">
+            <label class="field-label" for="matrixTemplateInput">Template Prompt:</label>
+            <textarea 
+              id="matrixTemplateInput" 
+              class="prompt-textarea matrix-textarea" 
+              placeholder="Contoh:&#10;buatkan gambar [kucing, anjing, panda] gaya 3D dengan warna [oren, putih] memakai [topi koki, kacamata hitam]"
+              rows="4"
+              spellcheck="false"
+            ></textarea>
+
+            <div class="matrix-actions-row">
+              <button id="btnGenerateMatrix" class="btn btn-matrix">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Hasilkan Kombinasi</span>
+              </button>
+              <button id="btnMatrixSample" class="text-btn">Contoh Template</button>
+            </div>
+
+            <div id="matrixPreviewSection" class="matrix-preview-section" style="display: none;">
+              <div class="matrix-preview-header">
+                <span id="matrixPreviewCount" class="counter-badge">0 variasi</span>
+                <button id="btnApplyMatrixToQueue" class="btn-sm btn-primary">+ Masukkan ke Antrian</button>
+              </div>
+              <div id="matrixResultList" class="matrix-result-list"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================
+           TAB 3: RIWAYAT & GALERI MEDIA
+           ========================================== -->
+      <div id="tabContentHistory" class="tab-pane">
+        <section class="card history-section">
+          <div class="history-header">
+            <div class="history-title-wrap">
+              <h2 class="section-title">Riwayat &amp; Galeri Unduhan</h2>
+              <span id="historyTotalBadge" class="counter-badge">0 item</span>
+            </div>
+            <div class="history-actions">
+              <button id="btnExportCSV" class="text-btn" title="Unduh laporan CSV">Export CSV</button>
+              <button id="btnExportJSON" class="text-btn" title="Unduh riwayat JSON">Export JSON</button>
+              <button id="btnClearHistory" class="text-btn text-danger" title="Hapus riwayat">Hapus</button>
+            </div>
+          </div>
+
+          <!-- Filter / Sub-tab -->
+          <div class="history-filter-pills">
+            <button class="pill-btn active" data-filter="all">Semua</button>
+            <button class="pill-btn" data-filter="images">Hanya Gambar</button>
+            <button class="pill-btn" data-filter="success">Berhasil</button>
+            <button class="pill-btn" data-filter="failed">Gagal</button>
+          </div>
+
+          <!-- History Item List -->
+          <div id="historyListContainer" class="history-list-container">
+            <div class="empty-state">Belum ada riwayat eksekusi prompt.</div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ==========================================
+           TAB 4: PENGATURAN & STATISTIK
+           ========================================== -->
+      <div id="tabContentSettings" class="tab-pane">
+        <!-- Analytics Dashboard Stats -->
+        <section class="card stats-section">
+          <h2 class="section-title">📊 Statistik Kinerja Antrian</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-label">Total Diproses</span>
+              <span id="statTotalProcessed" class="stat-value">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Gambar Diunduh</span>
+              <span id="statTotalImages" class="stat-value text-success">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Tingkat Berhasil</span>
+              <span id="statSuccessRate" class="stat-value">100%</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Rata-rata Durasi</span>
+              <span id="statAvgDuration" class="stat-value">0s</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Detailed Settings -->
+        <section class="card settings-section">
+          <h2 class="section-title">⚙️ Konfigurasi Otomasi</h2>
+          <div class="settings-body">
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-title">Otomatis Unduh Gambar Selesai</span>
+                <span class="setting-desc">Mendeteksi dan mengunduh gambar hasil AI</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="autoDownloadImages" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-title">Otomatis Buka "New Chat"</span>
+                <span class="setting-desc">Mereset obrolan sebelum prompt berikutnya</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="alwaysNewChat" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-title">Batas Proses Berjalan (Concurrency)</span>
+                <span class="setting-desc">Tunggu jika ada ≥ 5 proses latar belakang aktif</span>
+              </div>
+              <div class="setting-input-group">
+                <input type="number" id="maxConcurrent" min="1" max="10" value="5">
+                <span class="unit">proses</span>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-title">Percobaan Ulang (Auto-Retry)</span>
+                <span class="setting-desc">Coba ulang otomatis jika prompt gagal/timeout</span>
+              </div>
+              <div class="setting-input-group">
+                <input type="number" id="maxRetries" min="0" max="5" value="2">
+                <span class="unit">kali</span>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-title">Jeda Setelah Jawaban Selesai</span>
+                <span class="setting-desc">Waktu jeda santai sebelum prompt selanjutnya</span>
+              </div>
+              <div class="setting-input-group">
+                <input type="number" id="delayAfterResponse" min="1" max="60" value="5">
+                <span class="unit">detik</span>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-title">Batas Maksimum Respons (Timeout)</span>
+                <span class="setting-desc">Keamanan jika Meta.ai berhenti mendadak</span>
+              </div>
+              <div class="setting-input-group">
+                <input type="number" id="maxTimeout" min="15" max="300" value="90">
+                <span class="unit">detik</span>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-title">Efek Suara Selesai (Audio Chime)</span>
+                <span class="setting-desc">Mainkan nada lonceng saat antrian tuntas</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="audioChimeToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="setting-title">Notifikasi Desktop Browser</span>
+                <span class="setting-desc">Tampilkan pop-up OS saat batch selesai</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="systemNotificationsToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Sticky Bottom Controls Footer -->
+    <footer class="action-footer">
+      <div class="controls-grid" id="controlsContainer">
+        <button id="btnStart" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span id="btnStartText">Mulai Antrian</span>
+        </button>
+
+        <button id="btnPause" class="btn btn-warning" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+          <span>Jeda</span>
+        </button>
+
+        <button id="btnStop" class="btn btn-danger" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <rect x="5" y="5" width="14" height="14"></rect>
+          </svg>
+          <span>Hentikan</span>
+        </button>
+      </div>
+
+      <div class="footer-meta-row">
+        <button id="btnOpenMeta" class="link-btn">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          Tab Meta.ai
+        </button>
+        <span class="shortcut-tip">Pintasan: <code>Alt+Shift+P</code></span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
